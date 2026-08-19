@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_sleep_state.xml -->
+<!-- Layout para la actividad de estados de sueño -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#f5f5f5">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_background"
+        android:padding="20dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🌙 Control de Estados de Sueño"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvConnectionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔴 Desconectado del servidor"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- Sleep State Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_background_white"
+        android:padding="20dp"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Selecciona tu estado de sueño actual:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#2c3e50"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- REM Button -->
+        <Button
+            android:id="@+id/btnRem"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="🧠 REM"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#FF6B6B"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="12dp"
+            android:enabled="false" />
+
+        <!-- Light Sleep Button -->
+        <Button
+            android:id="@+id/btnLight"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="🌅 SUEÑO LIGERO"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#4ECDC4"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="12dp"
+            android:enabled="false" />
+
+        <!-- Deep Sleep Button -->
+        <Button
+            android:id="@+id/btnDeep"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="😴 SUEÑO PROFUNDO"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#45B7D1"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="12dp"
+            android:enabled="false" />
+
+        <!-- Awake Button -->
+        <Button
+            android:id="@+id/btnAwake"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="☀️ DESPIERTO"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:backgroundTint="#96CEB4"
+            android:textColor="@android:color/white"
+            android:enabled="false" />
+
+    </LinearLayout>
+
+    <!-- Information Card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/rounded_background_white"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ℹ️ Información"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#2c3e50"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• Los cambios se reflejan en tiempo real en el dashboard\n• Tu ubicación se envía para mostrar en el mapa\n• Los estados se sincronizan automáticamente"
+            android:textSize="14sp"
+            android:textColor="#7f8c8d"
+            android:lineSpacingExtra="4dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

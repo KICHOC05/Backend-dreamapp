@@ -1,0 +1,25 @@
+# Directorios de datos de Docker
+ia/ollama/
+ia/open-webui/
+
+# Archivos de logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Cache de Docker
+.docker/
+
+# Node modules si hay desarrollo frontend
+node_modules/
+
+# Archivos de backup
+*.bak
+*.backup

@@ -1,0 +1,20 @@
+services:
+  firebird5-engine:
+    image: firebirdsql/firebird:5.0.2-noble
+    container_name: firebird5-engine
+    ports:
+      - 3051:3050
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - FIREBIRD_ROOT_PASSWORD=${FIREBIRD_ROOT_PASSWORD}
+      #- FIREBIRD_USER=jerry
+      #- FIREBIRD_PASSWORD=${FIREBIRD_PASSWORD}
+      - FIREBIRD_DATABASE_DEFAULT_CHARSET=UTF8
+      - TZ=America/Mexico_City
+    volumes:
+      - ./volumes/etc/firebird/databases.conf:/opt/firebird/databases.conf
+      - ./volumes/opt/firebird/security5.fdb:/opt/firebird/security5.fdb
+      - ./volumes/etc/firebird/firebird.conf:/opt/firebird/firebird.conf
+      - ./volumes/var/lib/firebird/data:/var/lib/firebird/data

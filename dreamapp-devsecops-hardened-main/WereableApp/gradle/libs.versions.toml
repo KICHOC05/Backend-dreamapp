@@ -1,0 +1,171 @@
+[versions]
+
+# =======================
+# Build & Kotlin
+# =======================
+
+agp = "8.10.0" # Android Gradle Plugin used to build Android applications.
+kotlin = "2.1.0" # Kotlin language version used in the project.
+
+# =======================
+# AndroidX Core & UI
+# =======================
+
+coreKtx = "1.16.0" # Kotlin extensions for Android core libraries.
+appcompat = "1.6.1" # Compatibility support for older Android versions using newer components.
+activity = "1.10.1" # Manages Android activity lifecycle.
+activityCompose = "1.10.1" # Compose integration with Android Activity lifecycle.
+constraintlayout = "2.1.4" # Layout manager for building complex UI with flat view hierarchy.
+coreSplashscreen = "1.0.1" # Official API for managing splash screens on Android 12+.
+
+# =======================
+# Lifecycle & State
+# =======================
+
+lifecycleRuntimeKtx = "2.9.2" # Lifecycle-aware components with Kotlin coroutine support.
+
+# =======================
+# Jetpack Compose (UI Toolkit)
+# =======================
+
+composeBom = "2024.09.00" # Bill of Materials to align Jetpack Compose dependencies.
+composeMaterial = "1.2.1" # Material Design components for Compose (Material 2).
+composeFoundation = "1.2.1" # Compose UI foundation (animations, layout primitives, etc.).
+material3Android = "1.3.2" # Material You (Material 3) UI components for Compose.
+material = "1.10.0" # Extended material components for Android (non-Compose).
+uiDesktop = "1.7.0" # Compose for Desktop UI elements.
+wearToolingPreview = "1.0.0" # Enables Wear OS preview support in Compose previews.
+materialIconsExtended = "1.7.8"
+
+# =======================
+# Navigation
+# =======================
+
+navigationComposeAndroid = "2.9.0" # Navigation component for Jetpack Compose apps.
+
+# =======================
+# Room (Local Persistence)
+# =======================
+
+room = "2.7.2" # SQLite database abstraction layer with support for LiveData, Flow, and coroutines.
+
+# =======================
+# Networking (Retrofit & Gson)
+# =======================
+
+retrofit = "3.0.0" # Type-safe HTTP client for networking in Android.
+converterGson = "2.9.0" # Retrofit converter for JSON using Gson.
+
+# =======================
+# Image Loading
+# =======================
+
+coilCompose = "2.7.0" # Image loading library optimized for Jetpack Compose.
+
+# =======================
+# Firebase
+# =======================
+
+firebaseAuth = "23.2.1" # Firebase Authentication SDK to handle user login and identity management.
+
+# =======================
+# Google Play Services & Wear OS
+# =======================
+
+playServicesAuth = "21.3.0" # Google Sign-In SDK (required for authenticating users with Google).
+credentialsPlayServicesAuth = "1.5.0" # Credential Manager integration for Play Services.
+playServicesWearable = "19.0.0" # Communication and data APIs for Wear OS support.
+googleGmsGoogleServices = "4.4.2" # Gradle plugin to apply Google Services configuration (e.g., Firebase).
+
+# =======================
+# Android Credential Manager
+# =======================
+
+credentials = "1.5.0" # Android Credential Manager (modern API for password/passkey-based login).
+googleid = "1.1.1" # Google ID sign-in integration with Credential Manager.
+
+# =======================
+# Dependency Injection - Hilt
+# =======================
+
+hiltAndroid = "2.52" # Hilt for dependency injection in Android.
+hiltNavigationCompose = "1.2.0" # Integration of Hilt with Jetpack Compose navigation.
+
+# =======================
+# Testing
+# =======================
+
+junit = "4.13.2" # Java unit testing framework.
+junitVersion = "1.1.5" # AndroidX JUnit extension for instrumentation tests.
+espressoCore = "3.5.1" # UI test framework for Android (simulate user interactions).
+
+# =======================
+# Charts
+# =======================
+vico = "2.1.3"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilCompose" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+play-services-wearable = { group = "com.google.android.gms", name = "play-services-wearable", version.ref = "playServicesWearable" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+androidx-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "composeFoundation" }
+androidx-wear-tooling-preview = { group = "androidx.wear", name = "wear-tooling-preview", version.ref = "wearToolingPreview" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+androidx-navigation-compose-android = { group = "androidx.navigation", name = "navigation-compose-android", version.ref = "navigationComposeAndroid" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "room" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltAndroid" }
+androidx-material-icons-extended-v178 = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+# Vico dependences.
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+# For Material 2 theming in Jetpack Compose.
+vico-compose-m2 = { group = "com.patrykandpatrick.vico", name = "compose-m2", version.ref = "vico" }
+# For Material 3 theming in Jetpack Compose.
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+# For Compose Multiplatform (Android, iOS, desktop).
+vico-multiplatform = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.ref = "vico" }
+# For Material 2 theming in Compose Multiplatform.
+vico-multiplatform-m2 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m2", version.ref = "vico" }
+# For Material 3 theming in Compose Multiplatform.
+vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
+# For the Android view system.
+vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }

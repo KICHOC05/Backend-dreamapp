@@ -1,0 +1,61 @@
+services:
+  ollama:
+    container_name: ollama
+    build:
+      context: ./ollama
+      dockerfile: Dockerfile
+    ports:
+      - 127.0.0.1:11434:11434
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - OLLAMA_MODELS=/ollama/models
+    volumes:
+      - ./ollama/models:/ollama/models
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+  
+  open-webui:
+    container_name: open-webui
+    image: ghcr.io/open-webui/open-webui:cuda
+    ports:
+      - 127.0.0.1:3000:8080
+    environment:
+      RAG_EMBEDDING_ENGINE: ollama
+      AUDIO_STT_ENGINE: openai
+      OLLAMA_BASE_URL: http://ollama:11434
+      ENABLE_SIGNUP: "false"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ./open-webui:/app/backend/data
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      ollama:
+        condition: service_healthy
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+volumes:
+  ollama:
+    external: true
+    name: ollama
+  open-webui:
+    external: true
+    name: open-webui
+
+# Configuración automática de modelos de IA
+# El modelo qwen2.5:0.5b se descarga automáticamente al iniciar el contenedor
+# No es necesario ejecutar comandos manualmente para descargar modelos
+# El sistema verifica si el modelo ya existe antes de descargarlo

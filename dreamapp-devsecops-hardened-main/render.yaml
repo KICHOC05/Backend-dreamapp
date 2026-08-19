@@ -1,0 +1,59 @@
+services:
+  - type: web
+    name: dreamapp-api
+    runtime: docker
+    plan: free
+    rootDir: sleep-analysis-dreamapp-api
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: AI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AI_MODEL
+        value: openai/gpt-oss-20b
+      - key: AI_API_KEY
+        sync: false
+      - key: FUNCTIONS_INTERNAL_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://dreamapp-sleep-web.onrender.com
+      - key: ENVIRONMENT
+        value: production
+      - key: WEBSOCKETS_ENABLED
+        value: "false"
+      - key: FIREBASE_PROJECT_ID
+        value: dream-34ed4
+      - key: FIREBASE_FUNCTIONS_URL
+        value: https://us-central1-dream-34ed4.cloudfunctions.net/
+      - key: DB_ENABLED
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_APPS_SCRIPT_URL
+        sync: false
+      - key: GOOGLE_APPS_SCRIPT_SECRET
+        sync: false
+      - key: EMAIL_VERIFICATION_SECRET
+        generateValue: true
+      - key: PUBLIC_WEB_URL
+        value: https://dreamapp-sleep-web.onrender.com
+
+  - type: web
+    name: dreamapp-sleep-web
+    runtime: static
+    rootDir: dreamapp-web
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://dreamapp-api.onrender.com
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()

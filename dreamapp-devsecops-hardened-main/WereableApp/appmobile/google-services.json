@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "990434858723",
+    "project_id": "dream-34ed4",
+    "storage_bucket": "dream-34ed4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990434858723:android:2cecd395ca5b9e9f2157d6",
+        "android_client_info": {
+          "package_name": "com.example.appmobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "990434858723-pc9are84unfab0hr14ol6s7u32l5ts55.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwOv2vyY48dEOH2Z9BsMePV960V9qCB4U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "990434858723-pc9are84unfab0hr14ol6s7u32l5ts55.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
