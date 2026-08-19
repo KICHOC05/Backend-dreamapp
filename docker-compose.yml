@@ -1,0 +1,31 @@
+services:
+  javalin-server:
+    build: .
+    container_name: javalin-app
+    ports:
+      - "7070:7070"
+    networks:
+      - noxapp
+    environment:
+      - DB_HOST=firebird5-engine
+      - DB_PORT=3050
+      - DB_NAME=db_dashboard
+      - DB_USER=sysdba
+      - DB_PASSWORD=${DB_PASSWORD:-}
+      - DB_ENCODING=UTF8
+      - AI_BASE_URL=https://api.groq.com/openai/v1
+      - AI_API_KEY=${AI_API_KEY}
+      - FIREBASE_FUNCTIONS_URL=${FIREBASE_FUNCTIONS_URL}
+      - FUNCTIONS_INTERNAL_KEY=${FUNCTIONS_INTERNAL_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://*.onrender.com}
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  noxapp:
+    external: true

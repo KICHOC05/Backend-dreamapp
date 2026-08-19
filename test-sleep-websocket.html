@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Estados de Sueño - Prueba</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .connected {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sleep-states {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sleep-state-item {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+            background-color: #f8f9fa;
+        }
+        .state-rem { border-left-color: #FF6B6B; }
+        .state-light { border-left-color: #4ECDC4; }
+        .state-deep { border-left-color: #45B7D1; }
+        .state-awake { border-left-color: #96CEB4; }
+        
+        .user-info {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .location {
+            color: #888;
+            font-size: 0.8em;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px;
+        }
+        
+        .map-placeholder {
+            background-color: #ecf0f1;
+            height: 300px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+        
+        .log {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            border-bottom: 1px solid #34495e;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌙 Dashboard de Estados de Sueño</h1>
+            <p>Monitor en tiempo real de estados de sueño usando WebSockets</p>
+        </div>
+
+        <div id="connectionStatus" class="status disconnected">
+            Desconectado del servidor
+        </div>
+
+        <div class="controls">
+            <h3>Configuración de Conexión</h3>
+            <input type="text" id="serverUrl" value="ws://localhost:7070/ws/sleep/dashboard" placeholder="URL del WebSocket">
+            <button onclick="connectToServer()">Conectar</button>
+            <button onclick="disconnectFromServer()">Desconectar</button>
+            <button onclick="clearLog()">Limpiar Log</button>
+        </div>
+
+        <div class="controls">
+            <h3>Simular App Mobile (Envío de Estados)</h3>
+            <input type="text" id="userId" value="user123" placeholder="ID de Usuario">
+            <input type="text" id="userName" value="Juan Pérez" placeholder="Nombre de Usuario">
+            <select id="sleepState">
+                <option value="REM">REM</option>
+                <option value="LIGHT">LIGHT</option>
+                <option value="DEEP">DEEP</option>
+                <option value="AWAKE">AWAKE</option>
+            </select>
+            <button onclick="sendSleepState()">Enviar Estado</button>
+        </div>
+
+        <div class="sleep-states">
+            <h3>Estados de Sueño Actuales</h3>
+            <div id="sleepStatesList">
+                <p>No hay estados de sueño registrados</p>
+            </div>
+        </div>
+
+        <div class="map-placeholder">
+            <div>
+                <h3>Mapa (Placeholder)</h3>
+                <p>Aquí irían los puntos de colores en el mapa según los estados de sueño</p>
+            </div>
+        </div>
+
+        <div class="log">
+            <h4>Log de Eventos</h4>
+            <div id="eventLog"></div>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        let mobileWebsocket = null;
+        let isConnected = false;
+
+        function addLogEntry(message, type = 'info') {
+            const logDiv = document.getElementById('eventLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span style="color: #3498db">[${timestamp}]</span> ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            isConnected = connected;
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = 'Conectado al servidor';
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = 'Desconectado del servidor';
+            }
+        }
+
+        function connectToServer() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            
+            try {
+                // Conectar al WebSocket del dashboard
+                websocket = new WebSocket(serverUrl);
+                
+                websocket.onopen = function(event) {
+                    updateConnectionStatus(true);
+                    addLogEntry('Conectado al WebSocket del dashboard', 'success');
+                };
+                
+                websocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    addLogEntry(`Mensaje recibido: ${JSON.stringify(data)}`, 'info');
+                    handleDashboardMessage(data);
+                };
+                
+                websocket.onclose = function(event) {
+                    updateConnectionStatus(false);
+                    addLogEntry('Conexión cerrada', 'warning');
+                };
+                
+                websocket.onerror = function(error) {
+                    addLogEntry(`Error de conexión: ${error}`, 'error');
+                };
+
+                // También conectar al WebSocket mobile para poder enviar estados
+                const mobileUrl = serverUrl.replace('/dashboard', '/mobile');
+                mobileWebsocket = new WebSocket(mobileUrl);
+                
+                mobileWebsocket.onopen = function(event) {
+                    addLogEntry('Conectado al WebSocket mobile (para envío)', 'success');
+                };
+                
+                mobileWebsocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    addLogEntry(`Respuesta mobile: ${JSON.stringify(data)}`, 'info');
+                };
+                
+            } catch (error) {
+                addLogEntry(`Error al conectar: ${error.message}`, 'error');
+                updateConnectionStatus(false);
+            }
+        }
+
+        function disconnectFromServer() {
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+            if (mobileWebsocket) {
+                mobileWebsocket.close();
+                mobileWebsocket = null;
+            }
+            updateConnectionStatus(false);
+            addLogEntry('Desconectado manualmente', 'info');
+        }
+
+        function handleDashboardMessage(data) {
+            switch(data.action) {
+                case 'allStates':
+                    updateAllSleepStates(data.states);
+                    break;
+                case 'stateChange':
+                    updateSingleSleepState(data.event);
+                    break;
+                default:
+                    addLogEntry(`Acción desconocida: ${data.action}`, 'warning');
+            }
+        }
+
+        function updateAllSleepStates(states) {
+            const listDiv = document.getElementById('sleepStatesList');
+            
+            if (states.length === 0) {
+                listDiv.innerHTML = '<p>No hay estados de sueño registrados</p>';
+                return;
+            }
+            
+            listDiv.innerHTML = '';
+            states.forEach(state => {
+                addSleepStateToList(state);
+            });
+        }
+
+        function updateSingleSleepState(event) {
+            // Buscar si el usuario ya existe y actualizar, o agregar nuevo
+            const existingElement = document.querySelector(`[data-user-id="${event.userId}"]`);
+            if (existingElement) {
+                existingElement.remove();
+            }
+            addSleepStateToList(event);
+            
+            // Mostrar notificación visual
+            addLogEntry(`📍 ${event.userName} cambió a estado ${event.sleepStateDisplay}`, 'update');
+        }
+
+        function addSleepStateToList(state) {
+            const listDiv = document.getElementById('sleepStatesList');
+            const stateDiv = document.createElement('div');
+            stateDiv.className = `sleep-state-item state-${state.sleepState.toLowerCase()}`;
+            stateDiv.setAttribute('data-user-id', state.userId);
+            
+            const locationInfo = state.location && state.location.latitude ? 
+                `<div class="location">📍 ${state.location.latitude.toFixed(4)}, ${state.location.longitude.toFixed(4)} ${state.location.address || ''}</div>` : 
+                '<div class="location">📍 Sin ubicación</div>';
+            
+            stateDiv.innerHTML = `
+                <div class="user-info">${state.userName} (${state.userId})</div>
+                <div style="color: ${state.colorCode}; font-size: 1.2em; font-weight: bold;">
+                    🌙 ${state.sleepStateDisplay}
+                </div>
+                <div class="timestamp">⏰ ${new Date(state.timestamp).toLocaleString()}</div>
+                ${locationInfo}
+                ${state.deviceId ? `<div class="location">📱 ${state.deviceId}</div>` : ''}
+            `;
+            
+            listDiv.appendChild(stateDiv);
+        }
+
+        function sendSleepState() {
+            if (!mobileWebsocket || mobileWebsocket.readyState !== WebSocket.OPEN) {
+                addLogEntry('Error: No hay conexión WebSocket mobile activa', 'error');
+                return;
+            }
+            
+            const userId = document.getElementById('userId').value;
+            const userName = document.getElementById('userName').value;
+            const sleepState = document.getElementById('sleepState').value;
+            
+            if (!userId || !userName) {
+                addLogEntry('Error: ID de usuario y nombre son requeridos', 'error');
+                return;
+            }
+            
+            const message = {
+                action: 'changeSleepState',
+                userId: userId,
+                userName: userName,
+                sleepState: sleepState,
+                deviceId: 'web-test-device',
+                location: {
+                    latitude: -34.6037 + (Math.random() - 0.5) * 0.1, // Buenos Aires con variación
+                    longitude: -58.3816 + (Math.random() - 0.5) * 0.1,
+                    address: 'Buenos Aires, Argentina (Simulado)'
+                }
+            };
+            
+            mobileWebsocket.send(JSON.stringify(message));
+            addLogEntry(`📤 Enviando estado ${sleepState} para ${userName}`, 'sent');
+        }
+
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = '';
+        }
+
+        // Auto-conectar al cargar la página
+        window.onload = function() {
+            addLogEntry('Página cargada. Haz clic en "Conectar" para comenzar.', 'info');
+        };
+    </script>
+</body>
+</html>
