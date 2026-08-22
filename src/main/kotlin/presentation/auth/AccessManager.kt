@@ -17,7 +17,7 @@ object AccessManager {
         val bearer = ctx.header("Authorization")?.takeIf { it.startsWith("Bearer ", true) }
             ?.substringAfter(' ')?.trim()
         AuthTokenService.resolve(bearer)?.let { ctx.userInfo = it }
-        if (ctx.matchedPath() != "/api/image") ctx.refreshUserInfo()
+        if (ctx.endpoint().path != "/api/image") ctx.refreshUserInfo()
         val permittedRoles = ctx.routeRoles().filterIsInstance<Role>()
         val method = ctx.method().name
         when {

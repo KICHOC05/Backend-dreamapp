@@ -1,6 +1,7 @@
 package team.dreamapp.com.presentation.controller.users
 
 import io.javalin.http.Context
+import io.javalin.websocket.WsConfig
 import io.javalin.websocket.WsContext
 import team.dreamapp.com.domain.usecase.users.GetAllUsersUseCase
 import team.dreamapp.com.infrastructure.di.RepositoryProvider
@@ -16,21 +17,19 @@ object UserController {
     private val userConnections = mutableSetOf<WsContext>()
     private val objectMapper = jacksonObjectMapper()
 
-    // Register endpoint WebSocket in Javalin
-    fun registerWebSocket(app: io.javalin.Javalin) {
-        app.ws("/ws/users") { ws ->
-            ws.onConnect { ctx ->
-                userConnections.add(ctx)
-                logger.info("WebSocket connect: $ctx")
-                sendUsersToClient(ctx)
-            }
-            ws.onClose { ctx ->
-                userConnections.remove(ctx)
-                logger.info("WebSocket disconnect: $ctx")
-            }
-            ws.onError { ctx ->
-                logger.error("WebSocket error: $ctx")
-            }
+    // Javalin 7 requires WebSocket handlers to be configured before startup.
+    fun configureWebSocket(ws: WsConfig) {
+        ws.onConnect { ctx ->
+            userConnections.add(ctx)
+            logger.info("WebSocket connect: $ctx")
+            sendUsersToClient(ctx)
+        }
+        ws.onClose { ctx ->
+            userConnections.remove(ctx)
+            logger.info("WebSocket disconnect: $ctx")
+        }
+        ws.onError { ctx ->
+            logger.error("WebSocket error: $ctx")
         }
     }
 
