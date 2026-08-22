@@ -67,9 +67,9 @@ object Config {
             apiKey = value("AI_API_KEY", "ai.api-key")
         )
         SVR_FIRESTORE_CONF = ServerFirestoreConfig(
-            projectId = value("FIREBASE_PROJECT_ID", "firebase.project-id", "dream-34ed4"),
+            projectId = value("FIREBASE_PROJECT_ID", "firebase.project-id"),
             host = value("FIREBASE_HOST", "firebase.host", "localhost:8080"),
-            functionsUrl = value("FIREBASE_FUNCTIONS_URL", "firebase.url-functions", "https://us-central1-dream-34ed4.cloudfunctions.net/")
+            functionsUrl = value("FIREBASE_FUNCTIONS_URL", "firebase.url-functions")
         )
     }
 }

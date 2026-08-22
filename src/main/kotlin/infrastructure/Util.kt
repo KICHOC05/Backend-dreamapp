@@ -30,10 +30,7 @@ object Util {
     fun randomUUID() = UUID.randomUUID().toString().uppercase()
 
     /* */
-    fun hashPwd(password: String) = BCrypt.hashpw(password, BCrypt.gensalt())
-
-    /* */
-    //fun hashPwd(password: String) = BCrypt.hashpw(password, BCrypt.gensalt())
+    fun hashPwd(password: String) = BCrypt.hashpw(password, BCrypt.gensalt(12))
 
     /* Simple Date Format dd-MM-yy HH:mm:ss*/
     fun strDateTime(strDate: String, out: String = "dd-MM-yyyy HH:mm:ss"): String {
@@ -68,9 +65,8 @@ object Util {
     /* Database exception handler */
     fun dbErrorHandler(log: Logger, msg: String?) {
         msg?.apply {
-            val err = split(";")
-            log.error(this)
-            throw InternalServerErrorResponse(err[2])
+            log.error("Database error: {}", this)
+            throw InternalServerErrorResponse("Database error occurred")
         }
     }
 

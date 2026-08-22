@@ -1,0 +1,33 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+            <includeMdcKeyName>clientIp</includeMdcKeyName>
+            <fieldNames>
+                <timestamp>[ignore]</timestamp>
+                <version>[ignore]</version>
+            </fieldNames>
+            <customFields>{"service":"sleep-analysis-api","environment":"${ENVIRONMENT:-production}"}</customFields>
+        </encoder>
+    </appender>
+
+    <appender name="AUDIT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"log_type":"audit","service":"sleep-analysis-api"}</customFields>
+        </encoder>
+    </appender>
+
+    <logger name="AUDIT" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT" />
+    </logger>
+
+    <logger name="team.dreamapp.com" level="INFO" />
+    <logger name="io.javalin" level="WARN" />
+    <logger name="org.eclipse.jetty" level="WARN" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

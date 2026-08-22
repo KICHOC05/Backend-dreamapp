@@ -13,9 +13,6 @@ ai.model=openai/gpt-oss-20b
 ai.api-key=
 
 # Firebase variables configuration
-firebase.project-id=dream-34ed4
-# For production
-firebase.url-functions=https://us-central1-dream-34ed4.cloudfunctions.net/
-# Foe development
-#firebase.url-functions=http://127.0.0.1:5001/dream-34ed4/us-central1/
+firebase.project-id=
+firebase.url-functions=
 firebase.host=localhost:8080
