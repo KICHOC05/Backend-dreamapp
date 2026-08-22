@@ -79,7 +79,7 @@ function Landing({ enter, register }: { enter: () => void; register: () => void 
               <strong>62 bpm</strong>
             </div>
           </div>
-          <div className="stars">✦　·　✧　　·　✦</div>
+          <div className="stars">✦ · ✧ · ✦</div>
         </div>
       </section>
       <section className="benefits" id="beneficios">
@@ -377,16 +377,12 @@ function Dashboard({ session, exit }: { session: UserInfo; exit: () => void }) {
     [plan, setPlan] = useState("FREE"),
     [planMessage, setPlanMessage] = useState(""),
     [planBusy, setPlanBusy] = useState(false),
-    [busy] = useState(false),
-    [error, setError] = useState("");
+    [busy] = useState(false);
   useEffect(() => {
     api.subscription().then((result) => setPlan(result.plan)).catch(() => undefined);
   }, []);
   useEffect(() => {
     if (!selected) return;
-    setStats(null);
-    setPrediction([]);
-    setAdvice("");
     Promise.allSettled([api.stats(selected), api.predictions(selected)]).then(
       ([s, p]) => {
         if (s.status === "fulfilled") setStats(s.value.data);
@@ -480,7 +476,6 @@ function Dashboard({ session, exit }: { session: UserInfo; exit: () => void }) {
             </h1>
           </div>
         </header>
-        {error && <div className="error">{error}</div>}
         {busy ? (
           <div className="loading">Preparando tu panel…</div>
         ) : view === "overview" ? (
