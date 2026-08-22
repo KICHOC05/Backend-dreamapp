@@ -5,7 +5,7 @@
 # =======================
 
 agp = "8.10.0" # Android Gradle Plugin used to build Android applications.
-kotlin = "2.1.0" # Kotlin language version used in the project.
+kotlin = "2.4.10" # Kotlin language version used in the project.
 
 # =======================
 # AndroidX Core & UI
