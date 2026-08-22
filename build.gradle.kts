@@ -53,7 +53,7 @@ dependencies {
     // =========================
     // Firebase & Firestore
     // =========================
-    implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation("com.google.firebase:firebase-admin:9.10.0")
     implementation("com.google.cloud:google-cloud-firestore:3.17.1")
 
     // =========================
