@@ -1,6 +1,5 @@
 package team.dreamapp.com.infrastructure.service.auth
 
-import io.javalin.http.Context
 import org.mindrot.jbcrypt.BCrypt
 import team.dreamapp.com.domain.entity.auth.UserInfo
 import team.dreamapp.com.domain.services.auth.AuthService
@@ -21,8 +20,5 @@ class AuthServiceImpl : AuthService {
         return user
     }
 
-    override fun logout(ctx: Context): Boolean {
-        ctx.sessionAttribute("USER_INFO", null)
-        return true
-    }
+    override fun logout(): Boolean = true
 }

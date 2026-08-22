@@ -20,6 +20,7 @@ import team.dreamapp.com.presentation.controller.sleep.SleepStateController
 import team.dreamapp.com.presentation.controller.users.UserController
 import team.dreamapp.com.presentation.controller.subscription.SubscriptionController
 import team.dreamapp.com.presentation.security.RequestSecurity
+import team.dreamapp.com.presentation.security.WebOriginPolicy
 
 /**
  * Entry point of the DreamApp backend server.
@@ -82,11 +83,9 @@ fun main() {
         config.startup.showJavalinBanner = true
         config.http.maxRequestSize = 1_048_576L
         config.http.strictContentTypes = true
-        val allowedOrigins = (System.getenv("ALLOWED_ORIGINS") ?: "https://*.onrender.com")
-            .split(',').map(String::trim).filter(String::isNotEmpty).toTypedArray()
         config.bundledPlugins.enableCors { cors ->
             cors.addRule {
-                allowedOrigins.forEach(it::allowHost)
+                WebOriginPolicy.allowedOrigins.forEach(it::allowHost)
                 it.allowCredentials = true
             }
         }
@@ -114,6 +113,7 @@ fun main() {
                 post("login", AuthController::login, Role.UNAUTHENTICATED)
                 post("register", RegistrationController::register, Role.UNAUTHENTICATED)
                 post("verify", RegistrationController::verify, Role.UNAUTHENTICATED)
+                get("session", AuthController::session, Role.SYSADMIN, Role.ADMIN, Role.CLIENT)
                 post("logout", AuthController::logout, Role.SYSADMIN, Role.ADMIN, Role.CLIENT)
             }
             // CRUD account endpoints
