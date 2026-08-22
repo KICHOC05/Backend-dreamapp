@@ -3,7 +3,7 @@ plugins {
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
-    id("org.owasp.dependencycheck") version "10.0.4"
+    id("org.owasp.dependencycheck") version "12.2.2"
     id("jacoco")
 }
 
@@ -142,6 +142,10 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
 
 dependencyCheck {
     failBuildOnCVSS = 7.0f
+    formats = listOf("HTML", "JSON", "SARIF")
+    providers.environmentVariable("NVD_API_KEY").orNull
+        ?.takeIf { it.isNotBlank() }
+        ?.let { nvd.apiKey = it }
 }
 
 kotlin {

@@ -1,5 +1,11 @@
 # NOX Sleep Analysis - Servidor de Análisis Médico
 
+> Este repositorio contiene exclusivamente el backend Kotlin/Javalin de DreamApp. Los clientes Android, el frontend, Firebase Functions y las bases o backups Firebird no forman parte de este repositorio.
+
+## DevSecOps
+
+Los controles de integración y entrega están definidos en `.github/workflows/devsecops.yml`: pruebas, cobertura, Detekt, CodeQL, OWASP Dependency-Check, Gitleaks, Trivy, SBOM SPDX, construcción y publicación de la imagen en GHCR y DAST con OWASP ZAP. Consulta `DEVSECOPS.md` para el flujo de aprobación y `SECURITY.md` para el manejo de vulnerabilidades y secretos.
+
 ## Índice
 1. [Introducción](#introducción)
 2. [Objetivo General](#objetivo-general)
@@ -119,7 +125,7 @@ graph TB
 ### Framework Principal
 - **Javalin 6.3.0**: Framework web ligero y moderno para Kotlin/Java
 - **Kotlin 2.1.21**: Lenguaje de programación principal con soporte completo de corrutinas
-- **JVM 21**: Máquina virtual Java con optimizaciones de rendimiento
+- **JVM 17**: versión LTS usada por Gradle, CI y la imagen Docker
 
 ### Base de Datos y Conectividad
 - **Firebird 5.0**: Base de datos relacional para autenticación de médicos
@@ -148,7 +154,7 @@ graph TB
 
 ## Configuración del Proyecto
 
-### Configuración Local (server.properties)
+### Configuración Local (`server.properties.example`)
 
 ```properties
 # Configuración Base de Datos Firebird (Autenticación)
@@ -171,7 +177,7 @@ ollama.model=mistral:7b
 firebase.host=localhost:8080
 ```
 
-### Configuración Docker (server.docker.properties)
+### Configuración Docker (`server.docker.properties.example`)
 
 ```properties
 # Configuración Base de Datos Firebird para Docker
@@ -217,8 +223,8 @@ sleep-analysis-dreamapp-api/
 ├── docker-compose.yml               # Orquestación de contenedores
 ├── Dockerfile                       # Imagen de contenedor
 ├── config/
-│   ├── server.properties           # Configuración local
-│   └── server.docker.properties    # Configuración Docker
+│   ├── server.properties.example        # Plantilla local sin secretos
+│   └── server.docker.properties.example # Plantilla Docker sin secretos
 ├── src/main/kotlin/
 │   ├── Main.kt                     # Punto de entrada principal
 │   ├── domain/                     # Lógica de negocio
@@ -1346,24 +1352,9 @@ sequenceDiagram
 ### Dockerfile
 
 ```dockerfile
-# Imagen base Java 21
-FROM openjdk:21-jdk-slim
-
-# Directorio de trabajo
-WORKDIR /app
-
-# Copiar JAR compilado
-COPY build/libs/sleep-analysis-dreamapp-api-1.0-SNAPSHOT.jar app.jar
-
-# Copiar archivos de configuración
-COPY config/server.docker.properties config/server.properties
-COPY src/main/resources/serviceAccountKey.json .
-
-# Exponer puerto
-EXPOSE 7070
-
-# Comando de ejecución
-CMD ["java", "-jar", "app.jar"]
+# La imagen real usa un build multietapa, Java 17 fijado por digest,
+# un usuario sin privilegios y solo plantillas de configuración.
+docker build -t dreamapp-backend:local .
 ```
 
 ### Docker Compose
@@ -1441,8 +1432,8 @@ FIREBASE_FUNCTIONS_URL=http://host.docker.internal:5001/<FIREBASE_PROJECT_ID>/us
 
 #### 2. Ejecutar Localmente
 ```bash
-# Copiar configuración local
-cp config/server.properties config/server.properties
+# Crear una configuración local ignorada por Git
+cp config/server.properties.example config/server.properties
 
 # Ejecutar con Java
 java -jar build/libs/sleep-analysis-dreamapp-api-1.0-SNAPSHOT.jar

@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jdk@sha256:85f00967bcc624fc19fa9c2cf124ea426a5363898e267141726f31f358c2e14b AS build
+FROM eclipse-temurin:17-jdk@sha256:a27c79d44326d5f689668df5fedfee487652066d2a91e172747056cc7fbee6fc AS build
 WORKDIR /src
 COPY gradle/ gradle/
 COPY gradlew .
@@ -8,7 +8,7 @@ COPY src/ src/
 COPY config/ config/
 RUN ./gradlew clean shadowJar --no-daemon
 
-FROM eclipse-temurin:21-jre@sha256:7a65df4b22d2de92d4e04056e884f3b9122d70b21e2847fd66084278bd0ce037
+FROM eclipse-temurin:17-jre@sha256:13cc28a6cc72a38ce1f00c906be3580c1a3e604b8984d694f369a96742abc93b
 WORKDIR /app
 COPY --from=build /src/build/libs/sleep-analysis-dreamapp-api-1.0-SNAPSHOT-all.jar app.jar
 COPY config/server.docker.properties.example config/server.properties

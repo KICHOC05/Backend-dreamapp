@@ -1,0 +1,6 @@
+# El backend y sus controles de entrega requieren revision del propietario.
+* @KICHOC05
+/.github/ @KICHOC05
+/src/main/ @KICHOC05
+/Dockerfile @KICHOC05
+/build.gradle.kts @KICHOC05
