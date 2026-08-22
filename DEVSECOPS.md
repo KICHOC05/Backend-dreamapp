@@ -26,7 +26,7 @@
 - Actions habilitado con permisos de lectura por defecto y acciones fijadas a SHA.
 - Dependabot alerts y security updates habilitados.
 - Protección de `main` con checks obligatorios, revisión de CODEOWNERS y una aprobación mínima.
-- Secret opcional `NVD_API_KEY` para acelerar OWASP Dependency-Check.
+- Variable opcional `NVD_DATAFEED_URL` para sustituir el mirror NVD 2.0 mantenido por Dependency-Check.
 - Variable `DAST_TARGET_URL` con la URL HTTPS del API desplegado para activar el análisis ZAP semanal.
 
 ## Criterio de salida

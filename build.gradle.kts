@@ -143,9 +143,9 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
 dependencyCheck {
     failBuildOnCVSS = 7.0f
     formats = listOf("HTML", "JSON", "SARIF")
-    providers.environmentVariable("NVD_API_KEY").orNull
+    nvd.datafeedUrl = providers.environmentVariable("NVD_DATAFEED_URL").orNull
         ?.takeIf { it.isNotBlank() }
-        ?.let { nvd.apiKey = it }
+        ?: "https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"
 }
 
 kotlin {
