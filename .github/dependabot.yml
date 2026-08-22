@@ -23,6 +23,9 @@ updates:
     labels: [dependencies, docker]
     commit-message:
       prefix: deps
+    ignore:
+      - dependency-name: eclipse-temurin
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
