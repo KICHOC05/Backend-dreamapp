@@ -12,7 +12,7 @@ kotlin = "2.1.0" # Kotlin language version used in the project.
 # =======================
 
 coreKtx = "1.16.0" # Kotlin extensions for Android core libraries.
-appcompat = "1.6.1" # Compatibility support for older Android versions using newer components.
+appcompat = "1.8.0" # Compatibility support for older Android versions using newer components.
 activity = "1.10.1" # Manages Android activity lifecycle.
 activityCompose = "1.10.1" # Compose integration with Android Activity lifecycle.
 constraintlayout = "2.1.4" # Layout manager for building complex UI with flat view hierarchy.
