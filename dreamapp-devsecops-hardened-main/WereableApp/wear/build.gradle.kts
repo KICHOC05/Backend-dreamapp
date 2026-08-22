@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.wear.tooling.preview)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.room.common.jvm)

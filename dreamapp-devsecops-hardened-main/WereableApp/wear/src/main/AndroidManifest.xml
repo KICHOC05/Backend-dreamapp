@@ -3,6 +3,8 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-feature android:name="android.hardware.type.watch" />
@@ -22,9 +24,18 @@
             android:name=".presentation.data.communication.WearMessageReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data
+                    android:scheme="wear"
+                    android:host="*"
+                    android:path="/user_data" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".presentation.service.SensorForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="health" />
 
 
 
