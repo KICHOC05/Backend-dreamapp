@@ -51,19 +51,3 @@ updates:
       day: monday
       time: "06:00"
       timezone: America/Mexico_City
-
-  - package-ecosystem: docker
-    directory: /dreamapp-devsecops-hardened-main/firebird-server
-    schedule:
-      interval: weekly
-      day: monday
-      time: "06:00"
-      timezone: America/Mexico_City
-
-  - package-ecosystem: docker
-    directory: /dreamapp-devsecops-hardened-main/ia-server/ia
-    schedule:
-      interval: weekly
-      day: monday
-      time: "06:00"
-      timezone: America/Mexico_City
