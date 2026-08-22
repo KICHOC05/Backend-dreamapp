@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <suppress until="2026-10-01Z">
+        <notes><![CDATA[
+            CVE-2026-53914 affects unsafe deserialization in Kotlin Gradle build-cache
+            metadata. The matched org.jetbrains.kotlin artifacts in runtimeClasspath are
+            runtime libraries, not the Gradle plugin or its build cache. CI also disables
+            the Gradle build cache until Kotlin 2.4.20 stable is available. This narrow,
+            expiring suppression prevents the NVD product-level CPE from being applied to
+            non-affected runtime artifacts.
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/.*$</packageUrl>
+        <cve>CVE-2026-53914</cve>
+    </suppress>
+</suppressions>

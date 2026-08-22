@@ -1,6 +1,7 @@
 package team.dreamapp.com.presentation.controller.sleep
 
 import io.javalin.http.Context
+import io.javalin.websocket.WsConfig
 import io.javalin.websocket.WsContext
 import org.slf4j.LoggerFactory
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -23,61 +24,56 @@ object SleepStateController {
     // Store current sleep states for each user
     private val userSleepStates = ConcurrentHashMap<String, SleepStateEvent>()
 
-    /**
-     * Register WebSocket endpoints in Javalin
-     */
-    fun registerWebSocket(app: io.javalin.Javalin) {
-        // WebSocket for mobile apps (to send sleep state changes)
-        app.ws("/ws/sleep/mobile") { ws ->
-            ws.onConnect { ctx ->
-                mobileConnections.add(ctx)
-                logger.info("Mobile WebSocket connected: ${ctx}")
-                
-                // Send current sleep states to the newly connected mobile client
-                sendCurrentStatesToMobile(ctx)
-            }
-            
-            ws.onMessage { ctx ->
-                try {
-                    handleMobileMessage(ctx, ctx.message())
-                } catch (e: Exception) {
-                    logger.error("Error handling mobile message: ${e.message}", e)
-                    ctx.send(objectMapper.writeValueAsString(mapOf(
-                        "error" to "Invalid message format"
-                    )))
-                }
-            }
-            
-            ws.onClose { ctx ->
-                mobileConnections.remove(ctx)
-                logger.info("Mobile WebSocket disconnected: ${ctx}")
-            }
-            
-            ws.onError { ctx ->
-                mobileConnections.remove(ctx)
-                logger.error("Mobile WebSocket error: ${ctx}")
+    /** WebSocket for mobile apps (to send sleep state changes). */
+    fun configureMobileWebSocket(ws: WsConfig) {
+        ws.onConnect { ctx ->
+            mobileConnections.add(ctx)
+            logger.info("Mobile WebSocket connected: ${ctx}")
+
+            // Send current sleep states to the newly connected mobile client
+            sendCurrentStatesToMobile(ctx)
+        }
+
+        ws.onMessage { ctx ->
+            try {
+                handleMobileMessage(ctx, ctx.message())
+            } catch (e: Exception) {
+                logger.error("Error handling mobile message: ${e.message}", e)
+                ctx.send(objectMapper.writeValueAsString(mapOf(
+                    "error" to "Invalid message format"
+                )))
             }
         }
 
-        // WebSocket for dashboard (to receive sleep state updates)
-        app.ws("/ws/sleep/dashboard") { ws ->
-            ws.onConnect { ctx ->
-                dashboardConnections.add(ctx)
-                logger.info("Dashboard WebSocket connected: ${ctx}")
-                
-                // Send all current sleep states to the newly connected dashboard
-                sendAllStatesToDashboard(ctx)
-            }
-            
-            ws.onClose { ctx ->
-                dashboardConnections.remove(ctx)
-                logger.info("Dashboard WebSocket disconnected: ${ctx}")
-            }
-            
-            ws.onError { ctx ->
-                dashboardConnections.remove(ctx)
-                logger.error("Dashboard WebSocket error: ${ctx}")
-            }
+        ws.onClose { ctx ->
+            mobileConnections.remove(ctx)
+            logger.info("Mobile WebSocket disconnected: ${ctx}")
+        }
+
+        ws.onError { ctx ->
+            mobileConnections.remove(ctx)
+            logger.error("Mobile WebSocket error: ${ctx}")
+        }
+    }
+
+    /** WebSocket for dashboards (to receive sleep state updates). */
+    fun configureDashboardWebSocket(ws: WsConfig) {
+        ws.onConnect { ctx ->
+            dashboardConnections.add(ctx)
+            logger.info("Dashboard WebSocket connected: ${ctx}")
+
+            // Send all current sleep states to the newly connected dashboard
+            sendAllStatesToDashboard(ctx)
+        }
+
+        ws.onClose { ctx ->
+            dashboardConnections.remove(ctx)
+            logger.info("Dashboard WebSocket disconnected: ${ctx}")
+        }
+
+        ws.onError { ctx ->
+            dashboardConnections.remove(ctx)
+            logger.error("Dashboard WebSocket error: ${ctx}")
         }
     }
 

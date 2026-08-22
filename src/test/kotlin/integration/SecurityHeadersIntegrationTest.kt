@@ -20,10 +20,10 @@ class SecurityHeadersIntegrationTest {
     @BeforeEach
     fun setUp() {
         app = Javalin.create { config ->
-            config.showJavalinBanner = false
+            config.startup.showJavalinBanner = false
+            config.routes.before { ctx -> RequestSecurity.apply(ctx) }
+            config.routes.get("/test") { ctx -> ctx.json(mapOf("ok" to true)) }
         }.start(0)
-        app.before { ctx -> RequestSecurity.apply(ctx) }
-        app.get("/test") { ctx -> ctx.json(mapOf("ok" to true)) }
         baseUrl = "http://localhost:${app.port()}"
     }
 

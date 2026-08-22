@@ -54,7 +54,7 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Run static analysis, tests, coverage gate and packaging
-        run: ./gradlew detekt test jacocoTestCoverageVerification shadowJar --no-daemon --warning-mode=all
+        run: ./gradlew detekt test jacocoTestCoverageVerification shadowJar --no-daemon --no-build-cache --warning-mode=all
       - name: Upload quality and test reports
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -82,7 +82,7 @@ jobs:
       - name: Scan Gradle dependencies
         env:
           NVD_DATAFEED_URL: ${{ vars.NVD_DATAFEED_URL }}
-        run: ./gradlew dependencyCheckPurge dependencyCheckAnalyze --no-daemon
+        run: ./gradlew dependencyCheckPurge dependencyCheckAnalyze --no-daemon --no-build-cache
       - name: Upload dependency report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -173,7 +173,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4.4.3
       - name: Build for CodeQL
-        run: ./gradlew clean compileKotlin --no-daemon
+        run: ./gradlew clean compileKotlin --no-daemon --no-build-cache
       - name: Analyze
         uses: github/codeql-action/analyze@42947a340483f03ba47bb1a039b2c519aab3df85 # v3.28.17
 

@@ -34,27 +34,38 @@ dependencies {
     // =========================
     // Web Framework
     // =========================
-    implementation("io.javalin:javalin:6.3.0")
+    implementation("io.javalin:javalin:7.2.3")
 
     // =========================
     // Logging
     // =========================
-    implementation("org.slf4j:slf4j-api:2.0.13")
-    runtimeOnly("ch.qos.logback:logback-classic:1.4.14")
+    implementation("org.slf4j:slf4j-api:2.0.18")
+    runtimeOnly("ch.qos.logback:logback-classic:1.6.3")
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
 
     // =========================
     // JSON Serialization
     // =========================
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.2"))
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     // =========================
     // Firebase & Firestore
     // =========================
-    implementation("com.google.firebase:firebase-admin:9.2.0")
-    implementation("com.google.cloud:google-cloud-firestore:3.17.1")
+    implementation("com.google.firebase:firebase-admin:9.10.0")
+    implementation("com.google.cloud:google-cloud-firestore:3.45.0")
+
+    // Security floors for networking libraries brought in by Google Cloud.
+    // Netty 4.2.16 fixes the 4.2.15 CVE batch; HttpCore 5.4.3 and
+    // HttpClient 5.6.4 fix the header-exhaustion and connection-leak issues.
+    implementation(platform("io.netty:netty-bom:4.2.16.Final"))
+    constraints {
+        implementation("org.apache.httpcomponents.client5:httpclient5:5.6.4")
+        implementation("org.apache.httpcomponents.core5:httpcore5:5.4.3")
+        implementation("org.apache.httpcomponents.core5:httpcore5-h2:5.4.3")
+    }
 
     // =========================
     // Kotlin & Coroutines
@@ -143,6 +154,12 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
 dependencyCheck {
     failBuildOnCVSS = 7.0f
     formats = listOf("HTML", "JSON", "SARIF")
+    // The deployable API is represented by runtimeClasspath. Build plugins and
+    // compiler internals are governed separately and must not be reported as
+    // production application libraries.
+    scanConfigurations = listOf("runtimeClasspath")
+    suppressionFile = "config/dependency-check-suppressions.xml"
+    failBuildOnUnusedSuppressionRule = true
     nvd.datafeedUrl = providers.environmentVariable("NVD_DATAFEED_URL").orNull
         ?.takeIf { it.isNotBlank() }
         ?: "https://dependency-check.github.io/DependencyCheck_Builder/nvd_cache/nvdcve-{0}.json.gz"

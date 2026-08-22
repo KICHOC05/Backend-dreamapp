@@ -1,8 +1,10 @@
 package team.dreamapp.com.presentation.auth
 
 import io.javalin.http.ForbiddenResponse
+import io.javalin.http.Handler
 import io.javalin.http.HandlerType
 import io.javalin.http.UnauthorizedResponse
+import io.javalin.router.Endpoint
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
@@ -12,16 +14,6 @@ import team.dreamapp.com.domain.entity.auth.UserInfo
 import team.dreamapp.com.infrastructure.service.auth.AuthTokenService
 
 class AccessManagerCsrfTest {
-
-    private fun fakeUserInfo() = UserInfo(
-        id = "test-id",
-        userName = "testuser",
-        password = "secret123",
-        fullname = "Test User",
-        roles = listOf("Cliente"),
-        active = true,
-        currentDate = "2025-01-15"
-    )
 
     private fun mockContext(
         method: HandlerType = HandlerType.GET,
@@ -33,9 +25,10 @@ class AccessManagerCsrfTest {
         matchedPath: String = "/api/test"
     ): io.javalin.http.Context {
         val ctx = mock<io.javalin.http.Context>()
+        val endpoint = Endpoint(method, matchedPath, Handler { })
         whenever(ctx.method()).thenReturn(method)
         whenever(ctx.path()).thenReturn(path)
-        whenever(ctx.matchedPath()).thenReturn(matchedPath)
+        whenever(ctx.endpoint()).thenReturn(endpoint)
         whenever(ctx.header("Authorization")).thenReturn(authorization)
         whenever(ctx.header("Origin")).thenReturn(origin)
         whenever(ctx.header("Referer")).thenReturn(referer)

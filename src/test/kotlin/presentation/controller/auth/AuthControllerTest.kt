@@ -24,7 +24,7 @@ class AuthControllerTest {
 
     private fun mockLoginContext(loginRequest: LoginRequestDto): Context {
         val ctx = mock<Context>()
-        val validator = mock<BodyValidator<LoginRequestDto>>()
+        val validator = mock<BodyValidator<LoginRequestDto?>>()
         whenever(validator.get()).thenReturn(loginRequest)
         whenever(ctx.bodyValidator<LoginRequestDto>()).thenReturn(validator)
         whenever(ctx.status(400)).thenReturn(ctx)

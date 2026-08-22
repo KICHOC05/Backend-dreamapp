@@ -19,10 +19,10 @@ class HealthIntegrationTest {
     @BeforeEach
     fun setUp() {
         app = Javalin.create { config ->
-            config.showJavalinBanner = false
+            config.startup.showJavalinBanner = false
+            config.routes.get("/health") { ctx -> ctx.json(mapOf("status" to "ok")) }
+            config.routes.get("/") { ctx -> ctx.json(mapOf("message" to "Server Javalin")) }
         }.start(0)
-        app.get("/health") { ctx -> ctx.json(mapOf("status" to "ok")) }
-        app.get("/") { ctx -> ctx.json(mapOf("message" to "Server Javalin")) }
         baseUrl = "http://localhost:${app.port()}"
     }
 

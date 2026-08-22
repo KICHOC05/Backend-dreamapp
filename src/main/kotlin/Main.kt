@@ -77,8 +77,9 @@ fun main() {
     // Start the Javalin web server
     // =========================
 
+    val webSocketsEnabled = System.getenv("WEBSOCKETS_ENABLED")?.toBooleanStrictOrNull() ?: false
     val app = Javalin.create { config ->
-        config.showJavalinBanner = true
+        config.startup.showJavalinBanner = true
         config.http.maxRequestSize = 1_048_576L
         config.http.strictContentTypes = true
         val allowedOrigins = (System.getenv("ALLOWED_ORIGINS") ?: "https://*.onrender.com")
@@ -89,9 +90,20 @@ fun main() {
                 it.allowCredentials = true
             }
         }
-        config.router.mount { route ->
-            route.beforeMatched(AccessManager::handleAccess) // Middleware
-        }.apiBuilder {
+        config.routes.beforeMatched(AccessManager::handleAccess)
+        config.routes.before { ctx ->
+            RequestSecurity.apply(ctx)
+            ctx.contentType("application/json")
+        }
+        config.routes.exception(ValidationException::class.java) { e, ctx ->
+            val err = e.errors.values.single().joinToString { it.message }
+            ctx.result(err).status(400)
+        }
+        config.routes.exception(Exception::class.java) { e, ctx ->
+            logger.error("Unhandled exception on ${ctx.method()} ${ctx.path()}", e)
+            ctx.json(mapOf("error" to "Internal server error")).status(500)
+        }
+        config.routes.apiBuilder {
             // =========================
             // Endpoints
             // =========================
@@ -142,26 +154,17 @@ fun main() {
                 patch(SubscriptionController::update, Role.SYSADMIN, Role.ADMIN, Role.CLIENT)
             }
         }
-    }.exception(ValidationException::class.java) { e, ctx ->
-        val err = e.errors.values.single().joinToString { it.message }
-        ctx.result(err).status(400)
-    }.exception(Exception::class.java) { e, ctx ->
-        logger.error("Unhandled exception on ${ctx.method()} ${ctx.path()}", e)
-        ctx.json(mapOf("error" to "Internal server error")).status(500)
+        if (webSocketsEnabled) {
+            config.routes.ws("/ws/users", UserController::configureWebSocket)
+            config.routes.ws("/ws/sleep/mobile", SleepStateController::configureMobileWebSocket)
+            config.routes.ws("/ws/sleep/dashboard", SleepStateController::configureDashboardWebSocket)
+        }
     }.start("0.0.0.0", System.getenv("PORT")?.toIntOrNull() ?: 7070)
 
-    val webSocketsEnabled = System.getenv("WEBSOCKETS_ENABLED")?.toBooleanStrictOrNull() ?: false
     if (webSocketsEnabled) {
-        UserController.registerWebSocket(app)
-        SleepStateController.registerWebSocket(app)
         logger.warn("WebSockets enabled. Place the service behind an authenticated gateway before production use.")
     } else {
         logger.info("WebSockets disabled (WEBSOCKETS_ENABLED=false)")
-    }
-
-    app.before { ctx ->
-        RequestSecurity.apply(ctx)
-        ctx.contentType("application/json")
     }
 
     logger.info("✔ Application started successfully")
