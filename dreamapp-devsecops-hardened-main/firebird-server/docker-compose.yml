@@ -1,9 +1,9 @@
 services:
   firebird5-engine:
-    image: firebirdsql/firebird:5.0.2-noble
+    image: firebirdsql/firebird:5.0.2-noble@sha256:ac37a37ae971b6006ea2648c3d28afd64b848465d5d8151b29d31e8a7cbf8d8b
     container_name: firebird5-engine
     ports:
-      - 3051:3050
+      - 127.0.0.1:3051:3050
     restart: always
     security_opt:
       - no-new-privileges:true

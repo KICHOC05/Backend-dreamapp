@@ -1,0 +1,10 @@
+title = "DreamApp Gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Clave API de Firebase/Google para Android: identificador publico por diseno. Debe permanecer restringida por paquete y huellas SHA-1/SHA-256 en Google Cloud Console."
+regexes = [
+  '''AIzaSyDwOv2vyY48dEOH2Z9BsMePV960V9qCB4U''',
+]

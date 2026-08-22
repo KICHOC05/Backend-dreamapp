@@ -16,3 +16,6 @@ serviceAccountKey.json
 **/serviceAccountKey.json
 local.properties
 *.log
+*.fbk
+*.fdb
+*.gbk

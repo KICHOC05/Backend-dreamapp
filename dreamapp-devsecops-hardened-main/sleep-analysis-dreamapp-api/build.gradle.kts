@@ -2,6 +2,9 @@ plugins {
     kotlin("jvm") version "2.1.21"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("org.owasp.dependencycheck") version "10.0.4"
+    id("jacoco")
 }
 
 application {
@@ -14,9 +17,7 @@ tasks.jar {
     }
 }
 
-// Configure Shadow JAR (fat JAR)
 tasks.shadowJar {
-    archiveClassifier.set("")
     manifest {
         attributes["Main-Class"] = "team.dreamapp.com.MainKt"
     }
@@ -33,53 +34,116 @@ dependencies {
     // =========================
     // Web Framework
     // =========================
-    implementation("io.javalin:javalin:6.3.0") // Lightweight web framework
+    implementation("io.javalin:javalin:6.3.0")
 
     // =========================
     // Logging
     // =========================
-    implementation("org.slf4j:slf4j-api:2.0.13") // Logging API
-    implementation("org.slf4j:slf4j-simple:2.0.16") // Simple SLF4J backend (optional if using logback)
-    runtimeOnly("ch.qos.logback:logback-classic:1.4.14") // Logback backend for SLF4J
+    implementation("org.slf4j:slf4j-api:2.0.13")
+    runtimeOnly("ch.qos.logback:logback-classic:1.4.14")
+    runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
 
     // =========================
     // JSON Serialization
     // =========================
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1") // Core JSON support
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1") // Kotlin module for Jackson
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1") // Java time support
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
 
     // =========================
     // Firebase & Firestore
     // =========================
-    implementation("com.google.firebase:firebase-admin:9.2.0") // Firebase Admin SDK (Firestore, Auth, etc.)
-    implementation("com.google.cloud:google-cloud-firestore:3.17.1") // Optional direct access to Firestore
+    implementation("com.google.firebase:firebase-admin:9.2.0")
+    implementation("com.google.cloud:google-cloud-firestore:3.17.1")
 
     // =========================
     // Kotlin & Coroutines
     // =========================
-    implementation(kotlin("stdlib")) // Kotlin standard library
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0") // Coroutines core
-    // implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0") // Optional for Google Play Services
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 
     // =========================
     // Networking
     // =========================
-    implementation("com.squareup.okhttp3:okhttp:5.1.0") // HTTP client for REST or other web APIs
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
 
     // =========================
     // Database Connectivity & ORM
     // =========================
-    implementation("org.postgresql:postgresql:42.7.13") // PostgreSQL JDBC driver
-    implementation("com.zaxxer:HikariCP:6.3.0") // High-performance JDBC connection pool
-    implementation("com.github.seratch:kotliquery:1.9.1") // Lightweight SQL and JDBC wrapper for Kotlin
-    implementation("de.svenkubiak:jBCrypt:0.4.3") // Library for BCrypt password hashing
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("com.zaxxer:HikariCP:6.3.0")
+    implementation("com.github.seratch:kotliquery:1.9.1")
+    implementation("de.svenkubiak:jBCrypt:0.4.3")
+
+    // =========================
+    // Testing
+    // =========================
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.3")
+    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("org.mockito:mockito-core:5.12.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("com.h2database:h2:2.2.224")
+    testImplementation("org.slf4j:slf4j-simple:2.0.16")
 }
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+    testLogging {
+        events("passed", "skipped", "failed")
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            limit {
+                // Ratchet pattern: current coverage is ~12%. This gate prevents regression.
+                // Raise this value incrementally as test coverage improves (target: 0.60).
+                minimum = "0.10".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(rootProject.file("detekt.yml"))
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt> {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        sarif.required.set(true)
+    }
+}
+
+dependencyCheck {
+    failBuildOnCVSS = 7.0f
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }

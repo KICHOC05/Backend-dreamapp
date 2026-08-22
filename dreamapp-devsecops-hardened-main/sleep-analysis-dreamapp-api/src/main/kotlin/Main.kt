@@ -68,8 +68,10 @@ fun main() {
         logger.warn("Authentication database disabled with DB_ENABLED=false")
     }
 
-//    val firebaseDataSource = FirebaseDataSourceProduction()
-//    if (!validateDataSource("Firestore", { firebaseDataSource.init() }, { firebaseDataSource.isConnectionHealthy() })) return
+    val emailSecret = System.getenv("EMAIL_VERIFICATION_SECRET")
+    if (emailSecret.isNullOrBlank() || emailSecret.length < 32) {
+        logger.error("EMAIL_VERIFICATION_SECRET is not set or too short (< 32 chars). Registration will fail.")
+    }
 
     // =========================
     // Start the Javalin web server
@@ -142,7 +144,10 @@ fun main() {
         }
     }.exception(ValidationException::class.java) { e, ctx ->
         val err = e.errors.values.single().joinToString { it.message }
-        ctx.result(err).status(500)
+        ctx.result(err).status(400)
+    }.exception(Exception::class.java) { e, ctx ->
+        logger.error("Unhandled exception on ${ctx.method()} ${ctx.path()}", e)
+        ctx.json(mapOf("error" to "Internal server error")).status(500)
     }.start("0.0.0.0", System.getenv("PORT")?.toIntOrNull() ?: 7070)
 
     val webSocketsEnabled = System.getenv("WEBSOCKETS_ENABLED")?.toBooleanStrictOrNull() ?: false

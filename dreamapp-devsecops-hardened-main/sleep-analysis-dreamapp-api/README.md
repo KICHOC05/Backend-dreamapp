@@ -165,9 +165,9 @@ ollama.url=http://localhost:11434
 ollama.model=mistral:7b
 
 # Configuración Firebase (Datos de Sueño)
-firebase.project-id=dream-34ed4
-firebase.url-functions=https://us-central1-dream-34ed4.cloudfunctions.net/
-# Para desarrollo local usar: http://127.0.0.1:5001/dream-34ed4/us-central1/
+  firebase.project-id=<FIREBASE_PROJECT_ID>
+  firebase.url-functions=https://<region>-<FIREBASE_PROJECT_ID>.cloudfunctions.net/
+  # Para desarrollo local usar: http://127.0.0.1:5001/<FIREBASE_PROJECT_ID>/us-central1/
 firebase.host=localhost:8080
 ```
 
@@ -188,9 +188,9 @@ ollama.url=http://ollama:11434
 ollama.model=mistral:7b
 
 # Configuración Firebase para Docker
-firebase.project-id=dream-34ed4
-firebase.url-functions=https://us-central1-dream-34ed4.cloudfunctions.net/
-# Para desarrollo con Docker usar: http://host.docker.internal:5001/dream-34ed4/us-central1/
+  firebase.project-id=<FIREBASE_PROJECT_ID>
+  firebase.url-functions=https://<region>-<FIREBASE_PROJECT_ID>.cloudfunctions.net/
+  # Para desarrollo con Docker usar: http://host.docker.internal:5001/<FIREBASE_PROJECT_ID>/us-central1/
 firebase.host=localhost:8080
 ```
 
@@ -1385,7 +1385,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_ENCODING=UTF8
       - OLLAMA_URL=http://ollama:11434
-      - FIREBASE_FUNCTIONS_URL=http://host.docker.internal:5001/dream-34ed4/us-central1/
+      - FIREBASE_FUNCTIONS_URL=http://host.docker.internal:5001/<FIREBASE_PROJECT_ID>/us-central1/
     depends_on:
       - firebird5-engine
       - ollama
@@ -1423,7 +1423,7 @@ DB_ENCODING=UTF8
 OLLAMA_URL=http://ollama:11434
 
 # Configuración Firebase
-FIREBASE_FUNCTIONS_URL=http://host.docker.internal:5001/dream-34ed4/us-central1/
+FIREBASE_FUNCTIONS_URL=http://host.docker.internal:5001/<FIREBASE_PROJECT_ID>/us-central1/
 ```
 
 ## Despliegue
@@ -1500,7 +1500,7 @@ docker-compose exec firebird5-engine isql-fb -user sysdba -password <tu-contrase
 database.host=prod-firebird.company.com
 database.port=3050
 ollama.url=http://prod-ollama.company.com:11434
-firebase.url-functions=https://us-central1-dream-34ed4.cloudfunctions.net/
+firebase.url-functions=https://<region>-<FIREBASE_PROJECT_ID>.cloudfunctions.net/
 ```
 
 #### 2. Variables de Entorno Seguras
@@ -1737,10 +1737,10 @@ docker-compose logs ollama
 firebase emulators:start
 
 # Verificar emulador Functions
-curl http://localhost:5001/dream-34ed4/us-central1/getAllUsers
+curl http://localhost:5001/<FIREBASE_PROJECT_ID>/us-central1/getAllUsers
 
 # Para producción verificar URL
-curl https://us-central1-dream-34ed4.cloudfunctions.net/getAllUsers
+curl https://<region>-<FIREBASE_PROJECT_ID>.cloudfunctions.net/getAllUsers
 ```
 
 ### Problemas de Autenticación

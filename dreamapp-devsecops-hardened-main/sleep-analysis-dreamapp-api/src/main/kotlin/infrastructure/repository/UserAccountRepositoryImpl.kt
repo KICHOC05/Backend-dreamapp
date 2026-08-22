@@ -54,24 +54,39 @@ class UserAccountRepositoryImpl : UserAccountRepository {
     }
 
     override fun update(userAccount: UserAccount): String {
-        val password: String = if (!userAccount.password.startsWith("*")) {
-            userAccount.password =  hashPwd(userAccount.password)
-            "USER_PASSWORD = :password,"
-        } else ""
+        val updatePassword = !userAccount.password.startsWith("*")
+        if (updatePassword) {
+            userAccount.password = hashPwd(userAccount.password)
+        }
         val accMap = toMutableMap(userAccount).apply { put("rolesToString", userAccount.rolesToStr()) }
-        val qry = queryOf("""
-            UPDATE USER_ACCOUNT SET
-                USERNAME = :userName, 
-                FIRSTNAME = :firstName, 
-                LASTNAME = :lastName, 
-                $password
-                USER_ROLES = :rolesToString, 
-                MOBILE_PHONE = :mobilePhone,
-                PHONE_OFFICE = :phoneOffice,
-                PHONE_EXT = :phoneExt,
-                EMAIL = :email, 
-                IS_ACTIVE = :active
-            WHERE ID = CAST(:id AS UUID)""".trimIndent(), accMap)
+        val qry = if (updatePassword) {
+            queryOf("""
+                UPDATE USER_ACCOUNT SET
+                    USERNAME = :userName,
+                    FIRSTNAME = :firstName,
+                    LASTNAME = :lastName,
+                    USER_PASSWORD = :password,
+                    USER_ROLES = :rolesToString,
+                    MOBILE_PHONE = :mobilePhone,
+                    PHONE_OFFICE = :phoneOffice,
+                    PHONE_EXT = :phoneExt,
+                    EMAIL = :email,
+                    IS_ACTIVE = :active
+                WHERE ID = CAST(:id AS UUID)""".trimIndent(), accMap)
+        } else {
+            queryOf("""
+                UPDATE USER_ACCOUNT SET
+                    USERNAME = :userName,
+                    FIRSTNAME = :firstName,
+                    LASTNAME = :lastName,
+                    USER_ROLES = :rolesToString,
+                    MOBILE_PHONE = :mobilePhone,
+                    PHONE_OFFICE = :phoneOffice,
+                    PHONE_EXT = :phoneExt,
+                    EMAIL = :email,
+                    IS_ACTIVE = :active
+                WHERE ID = CAST(:id AS UUID)""".trimIndent(), accMap)
+        }
         var result = "failed"
         sessionOf(AuthDataSource.get()).use {
             try {
@@ -93,11 +108,12 @@ class UserAccountRepositoryImpl : UserAccountRepository {
     }
 
     override fun getAll(where: String): List<UserAccount> {
+        val allowedClauses = setOf("", "WHERE IS_ACTIVE = true", "WHERE IS_ACTIVE = false")
+        val safeWhere = if (where.trim() in allowedClauses) where.trim() else ""
         val qry = queryOf("""
         SELECT CAST(ID AS VARCHAR) AS "ID", USERNAME, FIRSTNAME, LASTNAME, USER_ROLES, MOBILE_PHONE, PHONE_OFFICE,
             PHONE_EXT, EMAIL, IS_ACTIVE
-        FROM USER_ACCOUNT
-        $where
+        FROM USER_ACCOUNT${if (safeWhere.isNotBlank()) " $safeWhere" else ""}
         ORDER BY FIRSTNAME, LASTNAME""".trimIndent())
             .map { row -> toUser(row) }.asList
         var accounts: List<UserAccount>
@@ -122,7 +138,11 @@ class UserAccountRepositoryImpl : UserAccountRepository {
     }
 
     override fun userInfoBy(type: String, param: String): UserInfo {
-        val where = if (type == "ID") "WHERE ID = CAST(? AS UUID)" else "WHERE USERNAME = ?"
+        val where = when (type) {
+            "ID" -> "WHERE ID = CAST(? AS UUID)"
+            "USERNAME" -> "WHERE USERNAME = ?"
+            else -> throw BadRequestResponse("Invalid lookup type")
+        }
         val qry = queryOf("""
             SELECT CAST(ID AS VARCHAR) AS "ID", USERNAME, FIRSTNAME, LASTNAME, USER_PASSWORD,
                 USER_ROLES, IS_ACTIVE, TO_CHAR(CURRENT_DATE, 'YYYY-MM-DD') AS "CURRENT_DATE"

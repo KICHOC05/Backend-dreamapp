@@ -17,6 +17,7 @@ services:
       - AI_API_KEY=${AI_API_KEY}
       - FIREBASE_FUNCTIONS_URL=${FIREBASE_FUNCTIONS_URL}
       - FUNCTIONS_INTERNAL_KEY=${FUNCTIONS_INTERNAL_KEY}
+      - TRUST_PROXY_HEADERS=${TRUST_PROXY_HEADERS:-false}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://*.onrender.com}
     read_only: true
     tmpfs:
@@ -25,6 +26,16 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   noxapp:

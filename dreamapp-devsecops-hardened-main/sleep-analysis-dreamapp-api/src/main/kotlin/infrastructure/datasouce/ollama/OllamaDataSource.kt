@@ -122,7 +122,7 @@ class AiDataSource {
                 .post(body)
                 .build()
 
-            logger.info("Sending prompt to Ollama server: ${prompt.take(100)}...")
+            logger.info("Sending prompt to Ollama server ({} chars)", prompt.length)
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {

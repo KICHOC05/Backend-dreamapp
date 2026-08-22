@@ -59,8 +59,9 @@ object AuthDataSource {
         val user = URLDecoder.decode(credentials[0], StandardCharsets.UTF_8)
         val password = URLDecoder.decode(credentials[1], StandardCharsets.UTF_8)
         val port = if (uri.port > 0) uri.port else 5432
-        val query = uri.rawQuery?.let { "?$it" }.orEmpty()
-        return ConnectionSettings("jdbc:postgresql://${uri.host}:$port${uri.rawPath}$query", user, password)
+        val existingQuery = uri.rawQuery?.let { "?$it" }.orEmpty()
+        val sslParam = if (existingQuery.isEmpty()) "?sslmode=require" else "&sslmode=require"
+        return ConnectionSettings("jdbc:postgresql://${uri.host}:$port${uri.rawPath}$existingQuery$sslParam", user, password)
     }
 
     private fun migrate() {

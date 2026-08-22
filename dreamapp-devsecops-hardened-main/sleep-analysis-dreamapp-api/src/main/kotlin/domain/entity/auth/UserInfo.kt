@@ -18,10 +18,10 @@ data class UserInfo(
     /* Map from strRole to Role  */
     fun mapRole(strRole: String) {
         roles.firstOrNull { it.equals(strRole, true) }?.also {
-            role = when(it) {
-                "SysAdmin" -> Role.SYSADMIN
-                "Admin" -> Role.ADMIN
-                "Cliente" -> Role.CLIENT
+            role = when(it.lowercase()) {
+                "sysadmin" -> Role.SYSADMIN
+                "admin" -> Role.ADMIN
+                "cliente" -> Role.CLIENT
                 else -> Role.UNAUTHENTICATED
             }
         } ?: throw BadRequestResponse("The user not have this permission")

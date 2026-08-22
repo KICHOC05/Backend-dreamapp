@@ -10,11 +10,13 @@ Este directorio contiene la configuración para desplegar un servidor de base de
 ```yaml
 services:
   firebird5-engine:
-    image: firebirdsql/firebird:5.0.2-noble
+    image: firebirdsql/firebird:5.0.2-noble@sha256:ac37a37ae971b6006ea2648c3d28afd64b848465d5d8151b29d31e8a7cbf8d8b
     container_name: firebird5-engine
     ports:
-      - 3051:3050
+      - 127.0.0.1:3051:3050
     restart: always
+    security_opt:
+      - no-new-privileges:true
     environment:
       - FIREBIRD_ROOT_PASSWORD=${FIREBIRD_ROOT_PASSWORD}
       #- FIREBIRD_USER=jerry
@@ -78,7 +80,9 @@ Ahora el servidor Firebird usará los volúmenes persistentes para almacenar los
 
 ### Restaurar un backup (.fbk) de la base de datos en Firebird Docker
 
-1. Copia el archivo de backup (`db_dashboard.fbk`) a la carpeta compartida del contenedor:
+> **Seguridad:** los backups (`.fbk`) y bases de datos (`.fdb`) NUNCA deben commitearse al repositorio (están en `.gitignore`). Almacénalos en un almacenamiento privado (p. ej. bucket cifrado) y tráelos solo al host que ejecuta el contenedor.
+
+1. Copia el archivo de backup (`db_dashboard.fbk`) desde tu almacenamiento privado a la carpeta compartida del contenedor:
    - En Windows, por ejemplo:
    ```
    copy db_dashboard.fbk c:\Firebase Container\volumes\var\lib\firebird\data\

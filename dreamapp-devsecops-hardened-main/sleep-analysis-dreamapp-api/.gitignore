@@ -48,3 +48,21 @@ bin/
 src/main/resources/serviceAccountKey.json
 *.env
 .env
+.env.*
+
+### Config files with secrets ###
+config/server.properties
+config/server.docker.properties
+
+### Firebird databases and backups ###
+*.fbk
+*.fdb
+*.gbk
+
+### Security scan reports ###
+*.sarif
+trivy-results.sarif
+trivy-image-results.sarif
+
+### Docker ###
+docker-compose.override.yml

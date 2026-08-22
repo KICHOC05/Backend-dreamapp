@@ -28,7 +28,8 @@ class SleepRepositoryImpl(
         logger.info("[getAllSleepSummaryByUser] Requesting from: {}", fullUrl)
         val request = HttpRequest.newBuilder()
             .uri(URI.create(fullUrl))
-            .header("X-Internal-Api-Key", System.getenv("FUNCTIONS_INTERNAL_KEY") ?: "")
+            .header("X-Internal-Api-Key", System.getenv("FUNCTIONS_INTERNAL_KEY")
+                ?: error("FUNCTIONS_INTERNAL_KEY environment variable is not set"))
             .GET()
             .build()
 
