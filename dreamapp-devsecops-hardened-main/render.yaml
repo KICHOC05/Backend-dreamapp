@@ -19,6 +19,8 @@ services:
         value: https://dreamapp-sleep-web.onrender.com
       - key: ENVIRONMENT
         value: production
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
       - key: WEBSOCKETS_ENABLED
         value: "false"
       - key: FIREBASE_PROJECT_ID

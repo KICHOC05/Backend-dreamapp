@@ -54,17 +54,15 @@ export class ApiError extends Error {
     super(message);
   }
 }
-const TOKEN_KEY = "dreamapp_session";
-export const clearSession = () => sessionStorage.removeItem(TOKEN_KEY);
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   let response: Response;
-  const token = sessionStorage.getItem(TOKEN_KEY);
   try {
     response = await fetch(`${API_URL}${path}`, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        "X-DreamApp-Request": "DreamAppWeb",
         ...options.headers,
       },
     });
@@ -87,25 +85,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 export const api = {
   health: () => request<{ status: string }>("/health"),
   login: async (userName: string, password: string) => {
-    const result = await request<{
+    return request<{
       success: boolean;
       data: UserInfo;
-      token: string;
+      expiresIn: number;
     }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ userName, password }),
     });
-    sessionStorage.setItem(TOKEN_KEY, result.token);
-    return result;
   },
   register: (payload: { firstName: string; lastName: string; userName: string; email: string; password: string }) =>
     request<{ success: boolean; message: string }>("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
   verify: (email: string, code: string) =>
     request<{ success: boolean; message: string }>("/auth/verify", { method: "POST", body: JSON.stringify({ email, code }) }),
+  session: () =>
+    request<{ success: boolean; data: UserInfo }>("/auth/session"),
   logout: () =>
-    request<{ success: boolean }>("/auth/logout", { method: "POST" }).finally(
-      clearSession,
-    ),
+    request<{ success: boolean }>("/auth/logout", { method: "POST" }),
   users: () => request<User[]>("/users"),
   stats: (uid: string) =>
     request<{ success: boolean; data: SleepStats }>(

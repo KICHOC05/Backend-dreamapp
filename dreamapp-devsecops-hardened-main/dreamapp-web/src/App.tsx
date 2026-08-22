@@ -662,6 +662,14 @@ export default function App() {
       "landing",
     ),
     [session, setSession] = useState<UserInfo | null>(null);
+  useEffect(() => {
+    api.session()
+      .then(({ data }) => {
+        setSession(data);
+        setScreen("dashboard");
+      })
+      .catch(() => undefined);
+  }, []);
   if (screen === "landing") return <Landing enter={() => setScreen("login")} register={() => setScreen("register")} />;
   if (screen === "register") return <Register back={() => setScreen("landing")} done={() => setScreen("login")} />;
   if (screen === "login" || !session)

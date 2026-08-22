@@ -7,6 +7,7 @@ const { apiMock } = vi.hoisted(() => ({
   apiMock: {
     health: vi.fn(),
     login: vi.fn(),
+    session: vi.fn(),
     register: vi.fn(),
     verify: vi.fn(),
     logout: vi.fn(),
@@ -76,6 +77,7 @@ const emptyStats = {
 describe("DreamApp", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    apiMock.session.mockRejectedValue(new Error("No active session"));
     apiMock.health.mockResolvedValue({ status: "ok" });
     apiMock.login.mockResolvedValue({ data: sessionUser });
     apiMock.register.mockResolvedValue({ message: "Código enviado" });

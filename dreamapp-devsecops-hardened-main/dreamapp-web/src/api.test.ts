@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, api, clearSession } from "./api";
+import { ApiError, api } from "./api";
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -10,7 +10,7 @@ describe("cliente de DreamApp API", () => {
     sessionStorage.clear();
   });
 
-  it("autentica, envía JSON y conserva temporalmente el token", async () => {
+  it("autentica con cookies HttpOnly sin almacenar el token en JavaScript", async () => {
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
@@ -22,7 +22,7 @@ describe("cliente de DreamApp API", () => {
             role: "USER",
             active: true,
           },
-          token: "temporary-token",
+          expiresIn: 43200,
         }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       ),
@@ -31,18 +31,21 @@ describe("cliente de DreamApp API", () => {
     const result = await api.login("ana", "Password123");
 
     expect(result.data.userName).toBe("ana");
-    expect(sessionStorage.getItem("dreamapp_session")).toBe("temporary-token");
+    expect(sessionStorage).toHaveLength(0);
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringMatching(/\/auth\/login$/),
       expect.objectContaining({
         method: "POST",
+        credentials: "include",
         body: JSON.stringify({ userName: "ana", password: "Password123" }),
+        headers: expect.objectContaining({
+          "X-DreamApp-Request": "DreamAppWeb",
+        }),
       }),
     );
   });
 
-  it("adjunta el bearer token y codifica identificadores de usuario", async () => {
-    sessionStorage.setItem("dreamapp_session", "session-token");
+  it("incluye credenciales de cookie y codifica identificadores de usuario", async () => {
     fetchMock.mockResolvedValue(
       new Response(JSON.stringify({ success: true, data: {} }), {
         status: 200,
@@ -55,8 +58,9 @@ describe("cliente de DreamApp API", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringMatching(/\/sleep\/stats\?uid=user%2Fwith%20spaces$/),
       expect.objectContaining({
+        credentials: "include",
         headers: expect.objectContaining({
-          Authorization: "Bearer session-token",
+          "X-DreamApp-Request": "DreamAppWeb",
         }),
       }),
     );
@@ -91,11 +95,20 @@ describe("cliente de DreamApp API", () => {
     });
   });
 
-  it("elimina explícitamente la sesión", () => {
-    sessionStorage.setItem("dreamapp_session", "session-token");
+  it("recupera la sesión autenticada desde la cookie del servidor", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ success: true, data: { id: "user-1" } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
-    clearSession();
+    const result = await api.session();
 
-    expect(sessionStorage.getItem("dreamapp_session")).toBeNull();
+    expect(result.data.id).toBe("user-1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringMatching(/\/auth\/session$/),
+      expect.objectContaining({ credentials: "include" }),
+    );
   });
 });

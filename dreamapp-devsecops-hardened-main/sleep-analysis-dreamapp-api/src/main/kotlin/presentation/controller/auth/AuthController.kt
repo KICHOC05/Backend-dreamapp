@@ -7,7 +7,9 @@ import team.dreamapp.com.domain.usecase.auth.LogoutUseCase
 import team.dreamapp.com.infrastructure.service.auth.AuthServiceImpl
 import team.dreamapp.com.presentation.dto.auth.LoginRequestDto
 import org.slf4j.LoggerFactory
+import team.dreamapp.com.infrastructure.service.auth.AuthSessionCookie
 import team.dreamapp.com.infrastructure.service.auth.AuthTokenService
+import team.dreamapp.com.presentation.auth.AccessManager
 
 object AuthController {
     private val logger = LoggerFactory.getLogger(AuthController::class.java)
@@ -21,9 +23,17 @@ object AuthController {
             return
         }
         try {
-            val userInfo = loginUseCase.execute(loginRequest.userName, loginRequest.password, "Cliente", ctx)
+            val userInfo = loginUseCase.execute(loginRequest.userName, loginRequest.password, "Cliente")
             val token = AuthTokenService.issue(userInfo)
-            ctx.json(mapOf("success" to true, "data" to userInfo, "token" to token, "expiresIn" to 43200))
+            AuthSessionCookie.set(ctx, token)
+            val response = mutableMapOf<String, Any>(
+                "success" to true,
+                "data" to userInfo,
+                "expiresIn" to AuthSessionCookie.MAX_AGE_SECONDS
+            )
+            val nonBrowserClient = ctx.header("Origin") == null && ctx.header("Sec-Fetch-Site") == null
+            if (nonBrowserClient) response["token"] = token
+            ctx.json(response)
         } catch (ex: Exception) {
             logger.warn("Failed login attempt for supplied username")
             ctx.status(401).json(mapOf("success" to false, "error" to "Invalid credentials"))
@@ -31,9 +41,14 @@ object AuthController {
     }
 
     fun logout(ctx: Context) {
-        AuthTokenService.revoke(ctx.header("Authorization")?.removePrefix("Bearer ")?.trim())
-        val result = logoutUseCase.execute(ctx)
+        val bearer = ctx.header("Authorization")?.removePrefix("Bearer ")?.trim()
+        AuthTokenService.revoke(bearer ?: AuthSessionCookie.read(ctx))
+        AuthSessionCookie.clear(ctx)
+        val result = logoutUseCase.execute()
         ctx.json(mapOf("success" to result))
     }
 
+    fun session(ctx: Context) {
+        ctx.json(mapOf("success" to true, "data" to AccessManager.currentUser(ctx)))
+    }
 }

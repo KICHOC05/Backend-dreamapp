@@ -8,120 +8,114 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import team.dreamapp.com.domain.entity.auth.Role
-import team.dreamapp.com.domain.entity.auth.UserInfo
-import team.dreamapp.com.infrastructure.service.auth.AuthTokenService
+import team.dreamapp.com.infrastructure.service.auth.AuthSessionCookie
 
 class AccessManagerCsrfTest {
 
-    private fun fakeUserInfo() = UserInfo(
-        id = "test-id",
-        userName = "testuser",
-        password = "secret123",
-        fullname = "Test User",
-        roles = listOf("Cliente"),
-        active = true,
-        currentDate = "2025-01-15"
-    )
-
     private fun mockContext(
         method: HandlerType = HandlerType.GET,
-        path: String = "/api/test",
         authorization: String? = null,
         origin: String? = null,
         referer: String? = null,
-        xRequestedWith: String? = null,
-        matchedPath: String = "/api/test"
+        webRequestHeader: String? = null,
+        secFetchSite: String? = null,
+        cookieToken: String? = null
     ): io.javalin.http.Context {
         val ctx = mock<io.javalin.http.Context>()
         whenever(ctx.method()).thenReturn(method)
-        whenever(ctx.path()).thenReturn(path)
-        whenever(ctx.matchedPath()).thenReturn(matchedPath)
+        whenever(ctx.path()).thenReturn("/api/test")
+        whenever(ctx.matchedPath()).thenReturn("/api/test")
         whenever(ctx.header("Authorization")).thenReturn(authorization)
         whenever(ctx.header("Origin")).thenReturn(origin)
         whenever(ctx.header("Referer")).thenReturn(referer)
-        whenever(ctx.header("X-Requested-With")).thenReturn(xRequestedWith)
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.CLIENT))
+        whenever(ctx.header("X-DreamApp-Request")).thenReturn(webRequestHeader)
+        whenever(ctx.header("Sec-Fetch-Site")).thenReturn(secFetchSite)
+        whenever(ctx.cookie(AuthSessionCookie.name())).thenReturn(cookieToken)
+        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
         whenever(ctx.ip()).thenReturn("127.0.0.1")
-
-        authorization?.let {
-            val token = it.removePrefix("Bearer ").trim()
-            val user = AuthTokenService.resolve(token)
-            whenever(ctx.sessionAttribute<UserInfo>("USER_INFO")).thenReturn(user)
-        }
-
         return ctx
     }
 
     @Test
-    fun `CSRF validation passes when Origin header is present`() {
-        val ctx = mockContext(method = HandlerType.POST, origin = "https://example.com")
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
+    fun `browser POST passes with an allowed origin and custom header`() {
+        val ctx = mockContext(
+            method = HandlerType.POST,
+            origin = "http://localhost:5173",
+            webRequestHeader = "DreamAppWeb"
+        )
 
         AccessManager.handleAccess(ctx)
     }
 
     @Test
-    fun `CSRF validation passes when Referer header is present`() {
-        val ctx = mockContext(method = HandlerType.POST, referer = "https://example.com/page")
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
+    fun `browser POST accepts an allowed referer and custom header`() {
+        val ctx = mockContext(
+            method = HandlerType.POST,
+            referer = "http://localhost:5173/register",
+            webRequestHeader = "DreamAppWeb"
+        )
 
         AccessManager.handleAccess(ctx)
     }
 
     @Test
-    fun `CSRF validation passes when X-Requested-With header is present`() {
-        val ctx = mockContext(method = HandlerType.POST, xRequestedWith = "XMLHttpRequest")
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
+    fun `browser POST rejects an untrusted origin`() {
+        val ctx = mockContext(
+            method = HandlerType.POST,
+            origin = "https://attacker.example",
+            webRequestHeader = "DreamAppWeb"
+        )
 
-        AccessManager.handleAccess(ctx)
+        assertThrows<ForbiddenResponse> { AccessManager.handleAccess(ctx) }
     }
 
     @Test
-    fun `CSRF validation fails when no Origin Referer or X-Requested-With`() {
+    fun `browser POST rejects a missing custom header`() {
+        val ctx = mockContext(method = HandlerType.POST, origin = "http://localhost:5173")
+
+        assertThrows<ForbiddenResponse> { AccessManager.handleAccess(ctx) }
+    }
+
+    @Test
+    fun `cookie authenticated mutation rejects missing browser proof`() {
+        val ctx = mockContext(method = HandlerType.PATCH, cookieToken = "opaque-token")
+
+        assertThrows<ForbiddenResponse> { AccessManager.handleAccess(ctx) }
+    }
+
+    @Test
+    fun `browser metadata without an origin is rejected`() {
+        val ctx = mockContext(method = HandlerType.DELETE, secFetchSite = "cross-site")
+
+        assertThrows<ForbiddenResponse> { AccessManager.handleAccess(ctx) }
+    }
+
+    @Test
+    fun `non browser clients remain compatible without CSRF headers`() {
         val ctx = mockContext(method = HandlerType.POST)
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
 
-        assertThrows<ForbiddenResponse> {
-            AccessManager.handleAccess(ctx)
-        }
+        AccessManager.handleAccess(ctx)
+    }
+
+    @Test
+    fun `bearer clients do not require browser CSRF headers`() {
+        val ctx = mockContext(method = HandlerType.POST, authorization = "Bearer opaque-token")
+
+        AccessManager.handleAccess(ctx)
     }
 
     @Test
     fun `GET requests skip CSRF validation`() {
-        val ctx = mockContext(method = HandlerType.GET)
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
+        val ctx = mockContext(method = HandlerType.GET, origin = "https://attacker.example")
 
         AccessManager.handleAccess(ctx)
     }
 
     @Test
-    fun `DELETE requests require CSRF validation`() {
-        val ctx = mockContext(method = HandlerType.DELETE)
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
-
-        assertThrows<ForbiddenResponse> {
-            AccessManager.handleAccess(ctx)
-        }
-    }
-
-    @Test
-    fun `authenticated user without token gets UnauthorizedResponse`() {
+    fun `authenticated route without a valid token is unauthorized`() {
         val ctx = mockContext(method = HandlerType.GET)
         whenever(ctx.routeRoles()).thenReturn(setOf(Role.CLIENT))
-        whenever(ctx.sessionAttribute<UserInfo>("USER_INFO")).thenReturn(null)
 
-        assertThrows<UnauthorizedResponse> {
-            AccessManager.handleAccess(ctx)
-        }
-    }
-
-    @Test
-    fun `PATCH requests require CSRF validation`() {
-        val ctx = mockContext(method = HandlerType.PATCH)
-        whenever(ctx.routeRoles()).thenReturn(setOf(Role.UNAUTHENTICATED))
-
-        assertThrows<ForbiddenResponse> {
-            AccessManager.handleAccess(ctx)
-        }
+        assertThrows<UnauthorizedResponse> { AccessManager.handleAccess(ctx) }
     }
 }
