@@ -439,9 +439,21 @@ fun main() {
 
 **Características**:
 - **Encriptación BCrypt**: Hashing seguro de contraseñas con salt automático
-- **Gestión de Sesiones**: Control de sesiones con timeout automático
+- **Gestión de Sesiones Web**: Cookie `HttpOnly`, `Secure`, `SameSite=None` y `Partitioned`, con expiración de 12 horas
+- **Protección CSRF**: Validación exacta de `Origin`/`Referer` y cabecera `X-DreamApp-Request` en operaciones mutables
 - **Roles de Usuario**: SYSADMIN, ADMIN, CLIENT con permisos diferenciados
 - **Validación de Credenciales**: Verificación robusta contra base de datos Firebird
+
+#### Contrato de sesión para el frontend
+
+- `POST /auth/login` crea la sesión en `Set-Cookie`; la respuesta web no expone el token a JavaScript.
+- `GET /auth/session` recupera el usuario de una sesión vigente después de recargar la aplicación.
+- `POST /auth/logout` revoca la sesión y elimina la cookie.
+- El frontend debe enviar `credentials: "include"` y `X-DreamApp-Request: DreamAppWeb`.
+- `ALLOWED_ORIGINS` debe contener orígenes exactos separados por comas; no se admiten comodines con credenciales.
+- En producción, `SESSION_COOKIE_SECURE=true` es obligatorio. Para desarrollo HTTP local puede establecerse en `false`.
+
+Los clientes no web conservan compatibilidad mediante `Authorization: Bearer <token>`; las respuestas de login solo incluyen ese token cuando la petición no contiene metadatos de navegador.
 
 #### **Flujo de Autenticación - Arquitectura Clean**
 

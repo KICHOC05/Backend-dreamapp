@@ -7,20 +7,10 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
-import team.dreamapp.com.domain.entity.auth.UserInfo
+import team.dreamapp.com.infrastructure.service.auth.AuthSessionCookie
 import team.dreamapp.com.presentation.dto.auth.LoginRequestDto
 
 class AuthControllerTest {
-
-    private fun fakeUserInfo() = UserInfo(
-        id = "test-id",
-        userName = "testuser",
-        password = "secret123",
-        fullname = "Test User",
-        roles = listOf("Cliente"),
-        active = true,
-        currentDate = "2025-01-15"
-    )
 
     private fun mockLoginContext(loginRequest: LoginRequestDto): Context {
         val ctx = mock<Context>()
@@ -50,13 +40,13 @@ class AuthControllerTest {
     }
 
     @Test
-    fun `logout revokes token from Authorization header`() {
+    fun `logout revokes and clears the HttpOnly session cookie`() {
         val ctx = mock<Context>()
-        whenever(ctx.header("Authorization")).thenReturn("Bearer some-token")
-        whenever(ctx.sessionAttribute<UserInfo>("USER_INFO")).thenReturn(fakeUserInfo())
+        whenever(ctx.cookie(AuthSessionCookie.name())).thenReturn("some-token")
 
         AuthController.logout(ctx)
 
-        verify(ctx).header("Authorization")
+        verify(ctx).cookie(AuthSessionCookie.name())
+        verify(ctx).header("Set-Cookie", AuthSessionCookie.serialize("", 0))
     }
 }
