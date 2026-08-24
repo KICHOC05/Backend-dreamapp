@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "2.1.21"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("jacoco")
 }
