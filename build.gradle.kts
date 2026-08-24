@@ -82,7 +82,7 @@ dependencies {
     // Database Connectivity & ORM
     // =========================
     implementation("org.postgresql:postgresql:42.7.13")
-    implementation("com.zaxxer:HikariCP:6.3.0")
+    implementation("com.zaxxer:HikariCP:7.1.0")
     implementation("com.github.seratch:kotliquery:1.9.1")
     implementation("de.svenkubiak:jBCrypt:0.4.3")
 
